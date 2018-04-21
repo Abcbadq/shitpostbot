@@ -57,8 +57,4 @@ client.on('ready',() => {
         }},config.timer)
 })
 
-async function post(){
-        
-    }
-
 client.login(config.token)
