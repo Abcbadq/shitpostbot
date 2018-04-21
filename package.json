@@ -1,0 +1,16 @@
+{
+  "name": "shitpostbot",
+  "version": "1.0.0",
+  "description": "literally notte",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "abc",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^11.3.2",
+    "snekfetch": "^3.6.4"
+  }
+}
