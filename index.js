@@ -14,7 +14,8 @@ const badsubs = [
     "funny",
     "me_irl",
     "meirl",
-    "BikiniBottomTwitter"
+    "BikiniBottomTwitter",
+    "surrealmemes"
 ]
 
 const client = new Discord.Client({
@@ -22,13 +23,12 @@ const client = new Discord.Client({
     disableEvents:['TYPING_START']
 })
 
-
 process.on('exit', () => {
     client.destroy()
 })
 
 client.on('ready',() => {
-    setInterval(async function(){
+    var interval = setInterval(async function() {
         console.log("shitpost activated")
         var children = await snekfetch.get(redditurl).then(r => r.body.data.children)
 
@@ -41,6 +41,9 @@ client.on('ready',() => {
                 typeof child.data.preview.images[0].source.url === 'undefined'){
                     return undefined
             }
+            if (child.data.preview.images[0].variants.indexOf('gif')>-1){
+                return child.data.preview.images[0].variants.gif.source.url
+            }
             return child.data.preview.images[0].source.url
         }
 
@@ -51,12 +54,11 @@ client.on('ready',() => {
         if(children.length > 0){
             console.log(children[Math.floor(Math.random()*children.length)])
             client.channels.get(config.channelid).send(children[Math.floor(Math.random()*children.length)])
-        }
-    },parseInt((Math.random()+1)*config.timer))
+        }},config.timer)
 })
 
-async function shitpost(){
-    
-}
+async function post(){
+        
+    }
 
 client.login(config.token)
