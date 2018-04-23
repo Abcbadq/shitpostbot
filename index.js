@@ -41,7 +41,7 @@ client.on('ready',() => {
                 typeof child.data.preview.images[0].source.url === 'undefined'){
                     return undefined
             }
-            if (child.data.preview.images[0].variants.indexOf('gif')>-1){
+            if (child.data.preview.images[0].variants.length > 0 && child.data.preview.images[0].variants.indexOf('gif') > (-1)){
                 return child.data.preview.images[0].variants.gif.source.url
             }
             return child.data.preview.images[0].source.url
