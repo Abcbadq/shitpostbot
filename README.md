@@ -13,6 +13,7 @@ Must have a config.json that contains:
   "timer":"-number of milliseconds between posts-",
   
   "subs":["-insert an array of subreddits that will be picked from"]
+  
 }
 
 # Function of bot
