@@ -1,0 +1,11 @@
+{
+
+  "token":"-discord bot token here-",
+
+  "channelid":"-channelid here-",
+
+  "timer":"-number of milliseconds between posts-",
+
+  "subs":["-insert an array of subreddits that will be picked from"]
+
+}
