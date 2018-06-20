@@ -25,7 +25,11 @@ A random picture is pulled from the aggregate pool of pictures and posted in a d
 # Commands
 
 !subs: returns a list of subreddits the picture can choose from
+
 !add [item]: add a subreddit
+
 !remove[item]: remove a subreddit
+
 !help: list commands
+
 !hockey: post a picture
