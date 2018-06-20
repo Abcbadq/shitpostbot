@@ -1,11 +1,12 @@
 {
-
-  "token":"-discord bot token here-",
-
-  "channelid":"-channelid here-",
-
-  "timer":"-number of milliseconds between posts-",
-
-  "subs":["-insert an array of subreddits that will be picked from"]
-
+    "token": "NDEwNjEyNzI4NDQ5OTkwNjc4.DVvxSA.RnwZSXghRjn_HJR5t0YSFjRm6E0",
+    "channelid":"309457977633538049",
+	"timer":43200000,
+	"admins":[
+		"165676227544350720",
+		"276962394251460608",
+		"229726339102408706",
+		"143237840438820866",
+		"101793746751848448"
+	]
 }
