@@ -28,7 +28,7 @@ A random picture is pulled from the aggregate pool of pictures and posted in a d
 
 !add [item]: add a subreddit
 
-!remove[item]: remove a subreddit
+!remove [item]: remove a subreddit
 
 !help: list commands
 
