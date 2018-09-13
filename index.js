@@ -1,6 +1,10 @@
 const Discord = require('discord.js')
 const snekfetch = require('snekfetch')
-const winston = require('winston')
+const cluster = require('cluster')
+
+var winston = require('winston')
+winston.add(winston.transports.File, {filename: 'error.log', level: 'error'})
+
 const fs = require('fs')
 const defaultSubs = require('./default.json')
 const config = require('./config.json')
@@ -16,12 +20,83 @@ process.on('exit', () => {
     client.destroy()
 })
 
-client.on('ready',() => {
-    var date = new Date()
-	winston.info(`Shitpost-Bot ready on ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`)
-    
-    var timedPost = setInterval(function(){sendImage()},config.timer)
+process.on('uncaughtException', function(error){
+    winston.error(error.message)
 })
+
+async function getSubBody(url){
+    return await snekfetch.get(url).then(r => r.body.data.children)
+}
+
+function saveSubs(subs){
+    fs.writeFile(`./refined.json` , JSON.stringify( subs , null , 4) , (err) => {
+        if(err){
+            var date = new Date()
+            winston.info(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}-Error while writing sub file`)
+            return
+        }
+        else{
+            var date = new Date()
+            winston.info(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}-Wrote sub file`)
+        }
+    })
+}
+
+client.on('ready', () => {
+	if(cluster.isMaster){
+		cluster.fork()
+	}
+	else{
+		setInterval(winston.info(() => {`I am posting le message`}, config.timer))
+	}
+})
+cluster.on('exit', (worker, code, signal) => {
+	cluster.fork()
+})
+cluster.on('online', (worker) => {
+	var timedPost = setInterval(function(){sendImage()},config.timer)
+})
+
+async function getImage(subs){
+    var date = new Date()
+    winston.info(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}-Pulling images`)
+    
+    var pool = []
+
+    for(var i=0 ; i < subs.length ; i++){
+        const currentsub = subs[i]
+        try{
+            var subchildren = await getSubBody(`${redditheader}${currentsub}/top/.json`)
+            subchildren = subchildren
+                    .map(x => x = nonAsyncGetPictureUrl(x))
+                    .filter(x => x)
+            if(subchildren.length > 0){
+                pool.push(nonAsyncPickOne(subchildren))
+            }
+        }
+        catch(err){
+            winston.error(`${currentsub} has caused an error:${err.message}`)
+        }
+    }
+    if(pool.length > 0){
+        return pool[Math.floor(Math.random()*pool.length)]
+    }
+    return null
+}
+
+async function sendImage(){
+    var subs = require('./refined.json')
+    var url = await getImage(subs)
+    if(url !== null){
+        var date = new Date()
+        winston.info(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}-Activated`)
+        client.channels.get(config.channelid).send(url)
+    }
+    else{
+        var date = new Date()
+        winston.info(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}-No images found`)
+    }
+}
 
 const juggernaut = "http://i2.kym-cdn.com/photos/images/original/000/456/960/d5e.jpg"
 client.on('message' , msg => {
@@ -81,65 +156,6 @@ client.on('message' , msg => {
     }
 })
 
-async function sendImage(){
-    var subs = require('./refined.json')
-    var url = await getImage(subs)
-    if(url !== null){
-        var date = new Date()
-        winston.info(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}-Activated`)
-        client.channels.get(config.channelid).send(url)
-    }
-    else{
-        var date = new Date()
-        winston.info(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}-No images found`)
-    }
-}
-
-function saveSubs(subs){
-    fs.writeFile(`./refined.json` , JSON.stringify( subs , null , 4) , (err) => {
-        if(err){
-            var date = new Date()
-            winston.info(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}-Error while writing sub file`)
-            return
-        }
-        else{
-            var date = new Date()
-            winston.info(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}-Wrote sub file`)
-        }
-    })
-}
-
-async function getImage(subs){
-    var date = new Date()
-    winston.info(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}-Pulling images`)
-    
-    var pool = []
-
-    for(var i=0 ; i < subs.length ; i++){
-        const currentsub = subs[i]
-        try{
-            var subchildren = await getSubBody(`${redditheader}${currentsub}/top/.json`)
-            subchildren = subchildren
-                    .map(x => x = nonAsyncGetPictureUrl(x))
-                    .filter(x => x)
-            if(subchildren.length > 0){
-                pool.push(nonAsyncPickOne(subchildren))
-            }
-        }
-        catch(err){
-            winston.error(`${currentsub} has caused an error:${err.message}`)
-        }
-    }
-    if(pool.length > 0){
-        return pool[Math.floor(Math.random()*pool.length)]
-    }
-    return null
-}
-
-async function getSubBody(url){
-    return await snekfetch.get(url).then(r => r.body.data.children)
-}
-
 function nonAsyncGetPictureUrl(child){
     if (typeof child.data === 'undefined' ||
         typeof child.data.preview === 'undefined' ||
@@ -149,7 +165,7 @@ function nonAsyncGetPictureUrl(child){
         typeof child.data.preview.images[0].source.url === 'undefined'){
         return undefined
     }
-    if(child.data.preview.images[0].variants.length > 0 && child.data.prevgiew.images[0].variants.indexOf('gif') > -1){
+    if(child.data.preview.images[0].variants.length > 0 && child.data.preview.images[0].variants.indexOf('gif') > -1){
         return child.data.preview.images[0].variants.gif.source.url
     }
     return child.data.preview.images[0].source.url
