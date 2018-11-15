@@ -157,18 +157,10 @@ client.on('message' , msg => {
 })
 
 function nonAsyncGetPictureUrl(child){
-    if (typeof child.data === 'undefined' ||
-        typeof child.data.preview === 'undefined' ||
-        typeof child.data.preview.images === 'undefined' ||
-        typeof child.data.preview.images[0] === 'undefined' ||
-        typeof child.data.preview.images[0].source === 'undefined' ||
-        typeof child.data.preview.images[0].source.url === 'undefined'){
-        return undefined
-    }
-    if(child.data.preview.images[0].variants.length > 0 && child.data.preview.images[0].variants.indexOf('gif') > -1){
-        return child.data.preview.images[0].variants.gif.source.url
-    }
-    return child.data.preview.images[0].source.url
+    if(child.data.post_hint == 'image'){
+	return child.data.url
+    }return undefined
+
 }
 
 function nonAsyncPickOne(array){
